@@ -1,0 +1,27 @@
+name: link-check
+
+on:
+  push:
+    paths:
+      - '**/*.md'
+      - '.github/workflows/link-check.yml'
+      - '.github/link-check-config.json'
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '.github/link-check-config.json'
+  schedule:
+    # 주 1회 외부 링크 헬스 체크 (월요일 09:00 UTC = 18:00 KST)
+    - cron: '0 9 * * 1'
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'yes'
+          config-file: '.github/link-check-config.json'

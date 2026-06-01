@@ -1,0 +1,17 @@
+{
+  "ignorePatterns": [
+    { "pattern": "^https://example\\." },
+    { "pattern": "^https://chatgpt\\.com/auth/device" },
+    { "pattern": "^http://localhost" },
+    { "pattern": "^http://127\\.0\\.0\\.1" },
+    { "pattern": "^https://claude\\.com" },
+    { "pattern": "<your-" },
+    { "pattern": "<project-" },
+    { "pattern": "<obsidian-claude-bridge>" }
+  ],
+  "timeout": "20s",
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200, 206]
+}

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  DEPRECATED: Hermes 네이티브 대시보드(localhost:9119, hermes-dashboard.service.example) 권장
+
+  launchd plist — dashboard-render.sh (60초 간격)
+
+  설치:
+    cp dashboard-render.plist.example ~/Library/LaunchAgents/com.agentic-harness.dashboard-render.plist
+    # 경로를 실제 위치로 수정 후:
+    launchctl load ~/Library/LaunchAgents/com.agentic-harness.dashboard-render.plist
+
+  해제:
+    launchctl unload ~/Library/LaunchAgents/com.agentic-harness.dashboard-render.plist
+
+  참고: Apple Silicon은 PATH에 /opt/homebrew/bin 포함 필수.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.agentic-harness.dashboard-render</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <!-- 실제 경로로 수정. dashboard-tick.sh가 agents-state → canvas + md 통합 wrapper -->
+    <string>/Users/YOUR_USERNAME/agentic-harness-playbook/scripts/dashboard-tick.sh</string>
+  </array>
+
+  <!-- 60초 간격 -->
+  <key>StartInterval</key>
+  <integer>60</integer>
+
+  <!-- 환경변수 (필요 시 수정) -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>MISSION_CONTROL_PATH</key>
+    <string>/Users/YOUR_USERNAME/Documents/SecondBrain/00-Mission-Control/dashboard.md</string>
+    <key>PAPERCLIP_URL</key>
+    <string>http://localhost:3100</string>
+    <key>VAULT_ROOT</key>
+    <string>/Users/YOUR_USERNAME/Documents/SecondBrain</string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/dashboard-render.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/dashboard-render.err</string>
+
+  <!-- 부팅 시 자동 시작 -->
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>

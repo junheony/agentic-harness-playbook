@@ -1,0 +1,16 @@
+# systemd service — quant rollup (Linux)
+# 주의: ExecStart의 routines/rollup.sh 는 이 저장소의
+#   examples/routines/quant-rollup.sh.example 을 복사+이름 변경한 것 (파일명 불일치는 의도된 컨벤션):
+#   mkdir -p ~/dev/quant/routines
+#   cp examples/routines/quant-rollup.sh.example ~/dev/quant/routines/rollup.sh
+#   chmod +x ~/dev/quant/routines/rollup.sh
+# <user> 는 본인 리눅스 사용자명으로 치환.
+
+[Unit]
+Description=Quant cycle: rollup (21:00 KST)
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/<user>/dev/quant/routines/rollup.sh
+StandardOutput=append:/home/<user>/.hermes/logs/quant-rollup.log
+StandardError=append:/home/<user>/.hermes/logs/quant-rollup.err

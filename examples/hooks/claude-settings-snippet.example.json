@@ -1,0 +1,50 @@
+{
+  "_comment": "이 파일의 hooks 키만 ~/.claude/settings.json 에 병합. 본 파일은 snippet — 단독으로 settings.json 대체 X. _comment/_install 키는 병합하지 말 것. subagent 호출 = Task tool이므로 PreToolUse/PostToolUse matcher는 'Task'. 훅은 STDIN으로 JSON(hook_event_name, session_id, tool_name, tool_input ...)을 받음 — cc-subagent-trace.sh 상단 주석 참고. 경로는 실제 clone 위치로 수정.",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${HOME}/agentic-harness-playbook/examples/hooks/cc-subagent-trace.sh"
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${HOME}/agentic-harness-playbook/examples/hooks/cc-subagent-trace.sh"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${HOME}/agentic-harness-playbook/examples/hooks/cc-subagent-trace.sh"
+          }
+        ]
+      }
+    ]
+  },
+
+  "_install": [
+    "0. 이벤트 의미: PreToolUse+Task → event=start / SubagentStop → event=stop / PostToolUse+Task 실패 → event=fail",
+    "1. 스크립트에 실행 권한 부여: chmod +x examples/hooks/cc-subagent-trace.sh",
+    "2. 위 command 경로를 실제 clone 위치로 수정 (예: ${HOME}/agentic-harness-playbook/...)",
+    "3. ~/.claude/settings.json 에 hooks 키만 병합: jq -s '.[0] * {hooks: .[1].hooks}' ~/.claude/settings.json claude-settings-snippet.example.json > merged.json",
+    "4. Claude Code 재시작 (settings.json의 hooks는 시작 시 로딩됨)",
+    "5. 다음 subagent 호출 시 ~/.hermes/agents-state/<session_id>.jsonl 에 이벤트 기록되는지 확인",
+    "6. scripts/agents-state.sh 실행 시 해당 agent가 active로 잡히는지 확인"
+  ]
+}

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Quant daily rollup (21:00 KST).
+# 오늘 사이클 요약 + Hermes Memory feedback
+set -uo pipefail
+
+TODAY=$(date +%Y-%m-%d)
+CYCLEDIR=~/dashboard-output/quant-cycles/$TODAY
+
+if [ -f "$CYCLEDIR/meta.json" ]; then
+  STAGE=$(jq -r ".stage" "$CYCLEDIR/meta.json")
+  STATUS=$(jq -r ".status" "$CYCLEDIR/meta.json")
+else
+  STAGE="missing"; STATUS="missing"
+fi
+
+SUMMARY="quant cycle ${TODAY}: stage=${STAGE} status=${STATUS} (placeholder routine)"
+
+# Hermes Memory feedback
+bash ~/agentic-harness/scripts/hermes-feedback.sh quant-loop "$SUMMARY"
+
+# Daily report 생성 (대시보드 vault에 도달)
+mkdir -p ~/dashboard-output/03-Daily-Reports
+cat > ~/dashboard-output/03-Daily-Reports/$TODAY-quant-cycle.md <<EOF
+# Quant Cycle $TODAY
+
+- Stage: $STAGE
+- Status: $STATUS
+- Cycle dir: \`$CYCLEDIR\`
+
+## Note
+이 routine은 현재 placeholder. 실제 ingest/review/execute 로직은
+~/dev/quant 에서 agent가 채워야 함.
+
+- Telegram #quant 토픽에 "quant ingest 로직 짜줘" → agent가 ~/dev/quant/routines/ingest.sh 수정
+- agent-commit-push로 branch push → Mac에서 review
+EOF

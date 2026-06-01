@@ -1,0 +1,38 @@
+name: 기능 제안
+description: 새 환경 가이드, 스킬, 워크플로 개선을 제안해주세요
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제
+      description: 어떤 불편/공백이 있나요? 왜 필요한가요?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 제안 내용
+      description: 어떻게 해결하면 좋을지. 가능하면 대안도 함께.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 영역
+      options:
+        - 환경 가이드 (Linux/NixOS/WSL2/Cloud)
+        - 도메인 스킬 (skills/)
+        - 스크립트 (scripts/)
+        - mini-router
+        - 문서 (docs/, playbook/)
+        - 기타
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: 추가 컨텍스트
+      description: 참고 링크, 스크린샷 등. 개인 식별 정보는 넣지 말 것.
+    validations:
+      required: false

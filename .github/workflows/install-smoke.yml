@@ -1,0 +1,46 @@
+name: install-smoke
+
+on:
+  push:
+    paths:
+      - 'scripts/**/*.sh'
+      - '.github/workflows/install-smoke.yml'
+  pull_request:
+    paths:
+      - 'scripts/**/*.sh'
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check all scripts
+        run: |
+          for f in scripts/*.sh; do
+            bash -n "$f"
+          done
+      - name: install-all.sh --help exits 0
+        run: bash scripts/install-all.sh --help
+      - name: install-all.sh --dry-run exits 0 (unattended)
+        env:
+          ASSUME_YES: '1'
+        run: bash scripts/install-all.sh --dry-run
+      - name: healthcheck.sh does not crash
+        run: |
+          # 맨몸 CI 러너에는 tmux 세션도 Keychain 시크릿도 없으므로 FAIL 항목이
+          # 나오는 게 정상이다 (healthcheck 계약: 전부 PASS면 exit 0, FAIL 있으면
+          # exit 1). 여기서는 "죽지 않고 끝까지 돈다"만 검증한다 — exit 0/1 외의
+          # 코드(2=문법 오류, 126/127=실행 불가, >=128=시그널)만 실패로 본다.
+          set +e
+          bash scripts/healthcheck.sh
+          rc=$?
+          set -e
+          if [ "$rc" -gt 1 ]; then
+            echo "healthcheck.sh crashed with exit code $rc"
+            exit 1
+          fi
+          echo "healthcheck.sh finished with exit code $rc (FAIL items are expected on a bare runner)"

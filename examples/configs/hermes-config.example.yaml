@@ -1,0 +1,143 @@
+# Hermes Agent Configuration (Example)
+# 위치: ~/.hermes/config.yaml
+# 본 파일을 복사 후 본인 환경에 맞게 수정 — 시크릿은 절대 여기 적지 말 것
+#
+# ─── 모델 placeholder ─────────────────────────────────
+# ${MODEL_LARGE} / ${MODEL_BALANCED} / ${MODEL_SMALL} 는 placeholder임.
+# 본인이 현재 사용 가능한 OpenAI 모델 ID로 직접 치환할 것.
+#   MODEL_LARGE    → 코딩/추론 강한 모델 (Codex 계열 또는 동급)
+#   MODEL_BALANCED → 일반 모델
+#   MODEL_SMALL    → 빠른 small 모델
+
+# ─── 모델 / 추론 ──────────────────────────────────────
+provider: openai
+model: ${MODEL_LARGE}
+small_model: ${MODEL_SMALL}
+variant: max          # max / high / medium (토큰 제약 없으면 max)
+
+# ─── 5 Pillar 파일 위치 ──────────────────────────────
+soul_file: ~/.hermes/SOUL.md
+memory_file: ~/.hermes/MEMORY.md
+user_file: ~/.hermes/USER.md
+skills_dir: ~/.hermes/skills
+
+# ─── Memory 동작 ─────────────────────────────────────
+memory:
+  persistent: true
+  fts5_recall: true                    # 과거 대화 전문 검색
+  honcho_user_modeling: true           # dialectic user model
+  auto_consolidate_threshold: 0.80     # 80% 도달 시 자동 압축
+  consolidation_strategy: "summarize"  # summarize | trim
+
+# ─── 자동 스킬 생성/개선 ──────────────────────────────
+skills:
+  auto_creation: true
+  auto_improvement: true
+  hub_sync: false                      # agentskills.io Hub 동기화
+  creation_threshold: 3                # 3회 반복 시 스킬화 후보
+
+# ─── Cron heartbeat ──────────────────────────────────
+crons:
+  enabled: true
+  heartbeat_interval_hours: 6
+  tasks:
+    - skill_review
+    - memory_consolidate
+    - output_cleanup
+    - status_file_write
+
+# ─── 음성 (STT) ──────────────────────────────────────
+voice:
+  stt: faster-whisper
+  stt_model: large-v3
+  push_to_talk: true
+  confidence_threshold: 0.7
+  telegram_voice_bubbles: true
+
+# ─── 프라이버시 ──────────────────────────────────────
+privacy:
+  redact_pii: true
+  exclude_paths:
+    - ~/.ssh/
+    - ~/.gnupg/
+    - ~/.config/gh/
+    - ~/.codex/
+    - ~/.claude/
+    - ~/.aws/
+    - "**/wallets/**"
+    - "**/private-keys/**"
+    - "**/tax-docs/**"
+    - "**/.env*"
+    - "~/Documents/SecondBrain-Private/**"
+    - "~/Documents/SecondBrain-Work/**"
+
+# ─── Telegram 게이트웨이 ──────────────────────────────
+telegram:
+  # [SECURITY] 토큰은 macOS Keychain에서 가져옴:
+  # security add-generic-password -a hermes -s telegram-bot-token -w "<TOKEN>"
+  allowed_users: [<YOUR_USER_ID>]
+  allowed_chats: [<YOUR_SUPERGROUP_CHAT_ID>]  # [v2.1] 필수
+  topic_routing: true
+  auto_thread: false
+  voice_response: true
+  reply_threading: true
+
+# ─── MCP 서버 ────────────────────────────────────────
+mcp_servers:
+  filesystem:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/Volumes/dev"]
+
+  git:
+    command: uvx
+    args: ["mcp-server-git"]
+
+  github:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_TOKEN}
+
+  postgres:
+    # [v2.1 SECURITY] connection string에 비밀번호 X. .pgpass 사용.
+    command: uvx
+    args: ["mcp-server-postgres"]
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: ${PGUSER}
+      # PGPASSWORD는 .pgpass에서 자동 로드됨
+
+  playwright:
+    command: npx
+    args: ["-y", "@executeautomation/playwright-mcp-server"]
+
+  # Phase 13~17에서 추가될 것들:
+  # ghidra:   ghidra-mcp --workspace /Volumes/dev/_ghidra_workspace
+  # obsidian: obsidian-mcp (플러그인 + claude-code-mcp)
+  # paperclip: paperclip-mcp --api http://localhost:3100
+
+# ─── 라우팅 ──────────────────────────────────────────
+routing:
+  enabled: true
+  default_target: "self"
+  rules_file: ~/.hermes/skills/router/SKILL.md
+  log_decisions: true
+  log_path: ~/.hermes/logs/router.log
+
+# ─── 로깅 ────────────────────────────────────────────
+logging:
+  level: info
+  path: ~/.hermes/logs/
+  rotation:
+    enabled: true
+    max_size_mb: 100
+    keep_count: 10
+
+# ─── 텔레메트리 (sanity 알람, hard stop X) ────────────
+telemetry:
+  alert_thresholds:
+    monthly_tokens: 50000000
+    daily_tokens: 5000000
+    single_task_tokens: 1000000
+  alert_channel: "telegram:#ops"

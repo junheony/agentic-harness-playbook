@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd agent — ~/.claude/.credentials.json 변경 시 서버로 자동 sync.
+
+  설치:
+    cp examples/configs/com.user.claude-creds-sync.plist \
+       ~/Library/LaunchAgents/com.user.claude-creds-sync.plist
+    launchctl load ~/Library/LaunchAgents/com.user.claude-creds-sync.plist
+
+  해제:
+    launchctl unload ~/Library/LaunchAgents/com.user.claude-creds-sync.plist
+    rm ~/Library/LaunchAgents/com.user.claude-creds-sync.plist
+
+  로그: ~/.claude-creds-sync.log
+
+  WatchPaths가 파일 atime/mtime 변경 감지 → ProgramArguments 실행.
+  실제 동기화 + 권한 + omo-proxy restart는 sync-claude-creds.sh가 처리.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.claude-creds-sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/<user>/bin/sync-claude-creds.sh</string>
+    </array>
+
+    <!-- credentials.json 변경 감지 -->
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/<user>/.claude/.credentials.json</string>
+    </array>
+
+    <!-- 환경변수 (필요 시 수정) -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>REMOTE</key>
+        <string>linux</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/<user>/.claude-creds-sync.stdout</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/<user>/.claude-creds-sync.stderr</string>
+
+    <!-- 부팅 시 X (file change-driven만) -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- 1회 실행 후 종료 (다음 변경 시 재실행) -->
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>

@@ -1,0 +1,16 @@
+# systemd service — quant ingest (Linux)
+# 주의: ExecStart의 routines/ingest.sh 는 이 저장소의
+#   examples/routines/quant-ingest.sh.example 을 복사+이름 변경한 것 (파일명 불일치는 의도된 컨벤션):
+#   mkdir -p ~/dev/quant/routines
+#   cp examples/routines/quant-ingest.sh.example ~/dev/quant/routines/ingest.sh
+#   chmod +x ~/dev/quant/routines/ingest.sh
+# <user> 는 본인 리눅스 사용자명으로 치환.
+
+[Unit]
+Description=Quant cycle: ingest (06:00 KST)
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/<user>/dev/quant/routines/ingest.sh
+StandardOutput=append:/home/<user>/.hermes/logs/quant-ingest.log
+StandardError=append:/home/<user>/.hermes/logs/quant-ingest.err

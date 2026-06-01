@@ -1,0 +1,51 @@
+# systemd drop-in override for hermes-gateway.service
+# 위치: ~/.config/systemd/user/hermes-gateway.service.d/override.conf
+#
+# 왜 drop-in인가:
+#   hermes update가 main unit (~/.config/systemd/user/hermes-gateway.service)를
+#   자기 default 형태로 덮어쓰면서 우리가 추가한 EnvironmentFile / wrapper ExecStart가
+#   사라지는 문제 발생. drop-in 파일은 hermes-cli가 안 만지므로 영구 보존됨.
+#
+# 우리가 패치하는 것:
+#   1. EnvironmentFile=~/.hermes/.env (TELEGRAM_ALLOWED_USERS / TELEGRAM_HOME_CHANNEL 등을
+#      환경변수로 주입. ANTHROPIC_BASE_URL / ANTHROPIC_API_KEY 는 off-policy opt-in — 아래 참고)
+#   2. ExecStart 재정의 — secret-tool에서 TELEGRAM_BOT_TOKEN lookup 후 hermes 실행
+#
+# 설치:
+#   mkdir -p ~/.config/systemd/user/hermes-gateway.service.d
+#   cp hermes-gateway.override.conf.example \
+#      ~/.config/systemd/user/hermes-gateway.service.d/override.conf
+#   # YOUR_USERNAME 경로 치환 후
+#   systemctl --user daemon-reload
+#   systemctl --user restart hermes-gateway.service
+#
+# 검증:
+#   PID=$(systemctl --user show -p MainPID --value hermes-gateway.service)
+#   tr '\0' '\n' < /proc/$PID/environ | grep -E "^TELEGRAM_|^ANTHROPIC_" | sed -E "s/(TOKEN.*=|KEY.*=).{12,}/\1<masked>/"
+#   # → TELEGRAM_BOT_TOKEN 등 다 보여야 함 (ANTHROPIC_*는 off-policy opt-in 시에만)
+#
+# 사전 준비:
+#   1. ~/.hermes/.env 에 TELEGRAM_ALLOWED_USERS, TELEGRAM_HOME_CHANNEL 등 작성 (chmod 600)
+#
+#      ┌─────────────────────────────────────────────────────────────────────┐
+#      │ ⚠️ OFF-POLICY (opt-in): 이 블록은 --enable-claude-proxy 사용자 전용, │
+#      │    기본 구성에서는 제외                                             │
+#      │                                                                     │
+#      │ ANTHROPIC_BASE_URL을 omo_proxy(Claude OAuth 재사용 프록시)로 돌리는 │
+#      │ 패턴은 Anthropic ToS상 금지 영역 — docs/10-claude-oauth-proxy.md    │
+#      │ 참고. 옵트인 시에만 .env 에 아래 두 줄 추가:                        │
+#      │   ANTHROPIC_API_KEY=proxy-placeholder                               │
+#      │   ANTHROPIC_BASE_URL=http://127.0.0.1:34156                         │
+#      └─────────────────────────────────────────────────────────────────────┘
+#
+#   2. secret-tool에 TELEGRAM_BOT_TOKEN 저장:
+#        printf '%s' '<BOT_TOKEN>' | secret-tool store \
+#          --label='Telegram bot token' \
+#          service hermes account telegram-bot-token
+
+[Service]
+EnvironmentFile=/home/YOUR_USERNAME/.hermes/.env
+
+# ExecStart reset (drop-in 규칙: 빈 줄로 reset 후 재정의)
+ExecStart=
+ExecStart=/bin/bash -c 'export TELEGRAM_BOT_TOKEN=$(secret-tool lookup service hermes account telegram-bot-token) && exec /home/YOUR_USERNAME/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main gateway run --replace'

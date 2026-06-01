@@ -1,0 +1,147 @@
+# Agent Registry (Example)
+# 위치 권장: ~/.hermes/agent-registry.yaml
+#
+# 이 시스템에 존재하는 모든 agent의 정적 정보 (역할 / 호출 조건 / 모델 할당).
+# 동적 state (지금 누가 활성인지)는 scripts/agents-state.sh 가 별도로 생성.
+#
+# 이 파일은 다음 곳에서 참조:
+# - canvas-render.sh: 칸반 카드에 role label 표기
+# - agents-state.sh: 로그에서 agent 이름 매칭 시 역할 룩업
+# - router SKILL.md: 도메인별 agent 선택 (e.g., "보안 감사" → Oracle)
+# - 신규 onboarding 사용자가 "어떤 agent들이 있나" 한눈에 파악
+
+# ─── omo (oh-my-openagent) specialists ────────────────────────
+# opencode 안에서 동작. Sisyphus가 hub로 다른 specialist 디스패치.
+# ulw / hpp ulw 키워드 시 활성화.
+omo:
+  sisyphus:
+    role: orchestrator
+    description: 작업 분해 + 다른 specialist 디스패치 + 결과 통합. ulw 진입점.
+    model: ${MODEL_LARGE}
+    variant: max
+    reasoning_effort: xhigh
+    triggers: [ulw, ultrawork, 풀세트, 폭주]
+    icon: "⚙"
+    dispatches_to: [hephaestus, oracle, librarian, explore, artistry]
+
+  hephaestus:
+    role: implementer
+    description: 실제 코드 작성 / 파일 수정 / 명령 실행. Sisyphus가 가장 자주 호출.
+    model: ${MODEL_LARGE}
+    variant: max
+    reasoning_effort: xhigh
+    icon: "🔨"
+    parent: sisyphus
+
+  oracle:
+    role: reviewer
+    description: 코드/설계 감사. 보안 / 정확성 / invariant 위반 탐지.
+    model: ${MODEL_BALANCED}
+    variant: high
+    reasoning_effort: high
+    icon: "🔍"
+    parent: sisyphus
+    domains: [security_audit, smart_contract, financial]
+
+  librarian:
+    role: spec_lookup
+    description: 외부 spec / docs 참조 (EIP, RFC, library docs). Context 정제.
+    model: ${MODEL_SMALL}
+    variant: medium
+    icon: "📚"
+    parent: sisyphus
+
+  explore:
+    role: codebase_search
+    description: 기존 코드 탐색 / 관련 파일 찾기. Hephaestus 전에 자주 호출.
+    model: ${MODEL_SMALL}
+    variant: medium
+    icon: "🔎"
+    parent: sisyphus
+
+  artistry:
+    role: ui_polish
+    description: 시각/UI 컴포넌트 / 차트 / 디자인 결정. Frontend 작업 시.
+    model: ${MODEL_BALANCED}
+    variant: max
+    reasoning_effort: xhigh
+    icon: "🎨"
+    parent: sisyphus
+
+  # hyperplan 모드용 (hpp ulw)
+  adversary_a:
+    role: adversarial_analyst
+    description: hyperplan 3-way 독립 분석 중 하나. 다른 두 분석과 cross-attack.
+    model: ${MODEL_LARGE}
+    variant: max
+    triggers: [hpp ulw, hyperplan]
+    icon: "🥊"
+    parent: sisyphus
+
+# ─── Claude Code native subagents ─────────────────────────────
+# ~/.claude/agents/ 에 정의됨. 키워드 기반 또는 명시 호출.
+claude_code:
+  code-reviewer:
+    role: code_quality_audit
+    description: 작성된 코드의 품질 / 보안 / 유지보수성 리뷰.
+    triggers: [리뷰, code review, PR 검토, quality check]
+    icon: "🔎"
+    severity_levels: [critical, major, minor]
+
+  test-automator:
+    role: test_generation
+    description: unit / integration / E2E 테스트 작성 + 커버리지 평가.
+    triggers: [테스트 작성, test coverage, e2e]
+    icon: "🧪"
+
+  docs-architect:
+    role: docs_generation
+    description: 개발자 문서 + OpenAPI/Swagger 스펙 / 코멘트 정리.
+    triggers: [문서 작성, OpenAPI, swagger, 주석]
+    icon: "📝"
+
+  architect-reviewer:
+    role: system_design_review
+    description: 시스템 아키텍처 / 기술 결정 검토. 의존 방향 / coupling 분석.
+    triggers: [아키텍처 검토, design review, technical decision]
+    icon: "🏛"
+
+  debugger:
+    role: error_root_cause
+    description: 에러 / 테스트 실패 / 예상 외 동작 원인 추적.
+    triggers: [debug, 디버그, crash, 에러 분석]
+    icon: "🐛"
+
+  error-detective:
+    role: log_analysis
+    description: 에러 로그 분석 / 근본 원인 추적 / 패턴 인식.
+    triggers: [error log, 로그 분석, root cause]
+    icon: "🔍"
+
+# ─── Hermes 자체 agent (5 pillar 기반) ────────────────────────
+# 직접적인 sub-agent는 아니지만 라우터가 "Hermes self"로 처리하는 흐름.
+hermes:
+  self:
+    role: gateway_and_memory
+    description: |
+      라우팅 결정 + 5 pillar 컨텍스트 주입 (Soul/Memory/User/Skills/Crons).
+      직접 응답 가능한 단순 쿼리 처리 (status / 잔고 조회 등).
+    icon: "🧠"
+    pillars: [soul, memory, user, skills, crons]
+
+# ─── 작업 유형별 권장 agent 매핑 (router가 사용) ───────────────
+task_routing:
+  new_feature_with_spec:    [sisyphus, hephaestus, oracle, librarian]
+  security_audit:            [adversary_a, oracle, librarian]    # hyperplan 권장
+  refactoring:               [sisyphus, hephaestus, oracle]
+  pr_review:                 [code-reviewer, architect-reviewer]
+  test_writing:              [test-automator, hephaestus]
+  documentation:             [docs-architect]
+  bug_investigation:         [debugger, error-detective, oracle]
+  ui_component:              [sisyphus, hephaestus, artistry]
+  domain_design:             [sisyphus, librarian, architect-reviewer]
+  simple_query:              [hermes.self]
+
+# ─── 모델 placeholder 안내 ────────────────────────────────────
+# 이 파일의 ${MODEL_LARGE} / ${MODEL_BALANCED} / ${MODEL_SMALL}는 본인 환경에
+# 맞춰 치환. opencode.example.jsonc 상단 안내 참고.

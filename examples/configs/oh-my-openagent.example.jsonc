@@ -1,0 +1,93 @@
+// oh-my-openagent (omo) Configuration
+// 위치: ~/.config/opencode/oh-my-openagent.jsonc
+//
+// 모델 placeholder: ${MODEL_LARGE}/${MODEL_BALANCED}/${MODEL_SMALL} 는 본인 환경의 실제
+// 모델 ID로 직접 치환. (opencode.example.jsonc 상단 안내 참고)
+{
+  // ─── 모델별 매핑 ──────────────────────────────────────
+  "models": {
+    "sisyphus": {
+      "model": "openai/${MODEL_LARGE}",
+      "variant": "max",
+      "reasoningEffort": "xhigh"
+    },
+    "hephaestus": {
+      "model": "openai/${MODEL_LARGE}",
+      "variant": "max",
+      "reasoningEffort": "xhigh"
+    },
+    "oracle": {
+      "model": "openai/${MODEL_BALANCED}",
+      "variant": "high",
+      "reasoningEffort": "high"
+    },
+    "librarian": {
+      "model": "openai/${MODEL_SMALL}",
+      "variant": "medium"
+    },
+    "explore": {
+      "model": "openai/${MODEL_SMALL}",
+      "variant": "medium"
+    },
+    "artistry": {
+      "model": "openai/${MODEL_BALANCED}",
+      "variant": "max",
+      "reasoningEffort": "xhigh"
+    }
+  },
+
+  // ─── ulw (ultrawork) — 풀스로틀 멀티 에이전트 ────────
+  "ultrawork": {
+    "enabled": true,
+    "force_parallel_planning": true,
+    "min_steps_for_plan_agent": 2,
+    "stop_until_complete": true,
+    "checkpoint_interval_seconds": 300,
+
+    // [v2.1] hard stop 없음, sanity 알람만
+    "budget_guard": {
+      "enabled": false
+    },
+
+    // [v2.1 CRITICAL] specialist 무한 루프 방지
+    "agent_timeouts": {
+      "default_seconds": 1800,
+      "hephaestus_seconds": 3600,
+      "oracle_seconds": 1800,
+      "librarian_seconds": 600,
+      "explore_seconds": 600
+    },
+    "abort_on_repeated_failures": 3
+  },
+
+  // ─── hpp ulw (hyperplan) — adversarial planning ──────
+  "hyperplan": {
+    "enabled": true,
+    "adversarial_cross_attack": true,
+    "independent_analyses": 3,
+    "consensus_required": 2  // 3개 중 2개 동의 필요
+  },
+
+  // ─── 백그라운드 작업 ─────────────────────────────────
+  "background_tasks": {
+    "enabled": true,
+    "max_parallel": 8,
+    "auto_resume_on_failure": true
+  },
+
+  // ─── 자동 스킬 로드 ──────────────────────────────────
+  "skills": {
+    "builtin": ["playwright", "git-worktrees", "ast-grep", "lsp-tools"],
+    "auto_load": true
+  },
+
+  // ─── 텔레메트리 (sanity 알람) ────────────────────────
+  "telemetry": {
+    "alert_thresholds": {
+      "monthly_tokens": 50000000,
+      "daily_tokens": 5000000,
+      "single_task_tokens": 1000000
+    },
+    "alert_channel": "telegram:#ops"
+  }
+}

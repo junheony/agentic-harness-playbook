@@ -1,0 +1,9 @@
+[Unit]
+Description=Hermes daily rollup — sessions 요약을 Memory에 한 줄 append
+After=hermes-gateway.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/<user>/agentic-harness/scripts/hermes-daily-rollup.sh
+StandardOutput=append:/home/<user>/.hermes/logs/daily-rollup.log
+StandardError=append:/home/<user>/.hermes/logs/daily-rollup.err

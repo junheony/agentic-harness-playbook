@@ -1,0 +1,56 @@
+name: 버그 리포트
+description: 스크립트, mini-router, 문서에서 발견한 버그를 알려주세요
+labels: [bug]
+body:
+  - type: input
+    id: os-env
+    attributes:
+      label: OS / 환경
+      description: "예: macOS 15 (Apple Silicon), Ubuntu 24.04, WSL2"
+      placeholder: macOS 15.x / Ubuntu 24.04
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Phase / 컴포넌트
+      description: 어느 부분에서 발생했나요?
+      options:
+        - scripts/install-all.sh (Phase 설치)
+        - scripts/healthcheck.sh
+        - scripts/ 기타 스크립트
+        - mini-router (bot.py)
+        - skills/ (router 등 SKILL.md)
+        - docs / playbook 문서
+        - GitHub Actions 워크플로
+        - 기타
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 재현 단계
+      description: 어떤 명령/순서로 실행하면 재현되나요?
+      placeholder: |
+        1. `ASSUME_YES=1 ./scripts/install-all.sh --only-phase=2`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: 예상 / 실제
+      description: 기대한 동작과 실제 동작을 각각 적어주세요.
+      placeholder: |
+        예상: ...
+        실제: ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 로그
+      description: 관련 로그/출력. 토큰·chat_id 등 시크릿은 반드시 redact.
+      render: text
+    validations:
+      required: false

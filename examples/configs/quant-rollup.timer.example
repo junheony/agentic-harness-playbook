@@ -1,0 +1,10 @@
+[Unit]
+Description=Quant rollup 21:00 KST = 12:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 12:00:00 UTC
+Persistent=true
+Unit=quant-rollup.service
+
+[Install]
+WantedBy=timers.target

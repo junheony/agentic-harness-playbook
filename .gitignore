@@ -1,0 +1,94 @@
+# ─── 시크릿 / 자격증명 (절대 커밋 금지) ─────────────────────
+.env
+.env.*
+!.env.example
+*.token
+*.key
+*.pem
+*.p12
+auth.json
+.pgpass
+
+# Hermes의 5 pillar — 개인정보 포함
+**/SOUL.md
+**/USER.md
+**/MEMORY.md
+.hermes/
+
+# Codex / Anthropic OAuth
+.codex/
+.claude/auth*
+
+# ─── 지갑 / 키 (절대 커밋 금지) ─────────────────────────────
+**/wallets/**
+**/private-keys/**
+**/seed*
+**/mnemonic*
+*.wallet
+*.keystore
+keystore/
+
+# ─── 세무 / 개인 자료 ──────────────────────────────────────
+**/01-Tax/**
+**/02-Wallets/**
+**/03-Personal/**
+**/tax-docs/**
+SecondBrain-Private/
+SecondBrain-Work/
+
+# ─── 로그 / 임시 ───────────────────────────────────────────
+*.log
+logs/
+*.tmp
+*.swp
+*.bak
+Thumbs.db
+.vscode/
+.idea/
+
+# ─── 빌드 산출물 ────────────────────────────────────────────
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+dist/
+build/
+target/
+out/
+coverage/
+
+# ─── Python venv ────────────────────────────────────────────
+.venv/
+venv/
+.python-version
+
+# ─── OS / 에디터 ────────────────────────────────────────────
+.DS_Store
+._*
+Desktop.ini
+
+# ─── 분석/RE 임시 파일 ──────────────────────────────────────
+**/_ghidra_workspace/
+**/decompiled/
+*.gpr
+*.gbf
+
+# ─── 데이터베이스 덤프 (민감) ───────────────────────────────
+*.dump
+*.sql.gz
+*.backup
+
+# ─── 예외: example 파일은 커밋 OK ───────────────────────────
+!examples/**/*.example.*
+!examples/**/SOUL.example.md
+!examples/**/USER.example.md
+!examples/**/MEMORY.example.md
+
+# ─── personal overlay (never commit) ───────────────────────
+# 개인 환경 전용 파일 — 예외 규칙보다 뒤에 둬서 항상 ignore 유지
+.omx/
+docs/18-agentic-telegram-vault-setup.md
+examples/configs/topic-map.agentic.personal.example.yaml
+scripts/agentic-vault-refresh.sh
+*.personal.*

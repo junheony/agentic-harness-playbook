@@ -1,0 +1,25 @@
+# DEPRECATED: Hermes 네이티브 대시보드(localhost:9119, hermes-dashboard.service.example) 권장
+# systemd service — dashboard-render (Linux용)
+# 이 파일은 dashboard-render.timer.example 과 쌍으로 사용됩니다.
+#
+# YOUR_USERNAME 및 경로를 실제 값으로 수정하세요.
+
+[Unit]
+Description=Mission Control dashboard markdown rollup
+After=network.target
+
+[Service]
+Type=oneshot
+User=YOUR_USERNAME
+
+# 실제 스크립트 경로로 수정. dashboard-tick.sh가 agents-state → canvas + md 통합 wrapper
+ExecStart=/bin/bash /home/YOUR_USERNAME/agentic-harness/scripts/dashboard-tick.sh
+
+# 환경변수 (필요 시 수정)
+Environment=MISSION_CONTROL_PATH=/home/YOUR_USERNAME/SecondBrain/00-Mission-Control/dashboard.md
+Environment=PAPERCLIP_URL=http://localhost:3100
+Environment=VAULT_ROOT=/home/YOUR_USERNAME/SecondBrain
+
+# 실패해도 타이머는 계속 돌아야 하므로 RemainAfterExit 불필요
+StandardOutput=journal
+StandardError=journal

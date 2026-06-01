@@ -1,0 +1,19 @@
+# 형식: <input>|<expected_target>
+# (라인 시작 # 은 주석)
+cc> 이 함수 리팩토링|claude-code
+oc> opencode 직접|opencode
+ulw 보안 감사|opencode-omo
+ultrawork 전체 모듈 가스 최적화|opencode-omo
+hpp ulw 보안 감사|opencode-omo-hyperplan
+hyperplan 컨센서스|opencode-omo-hyperplan
+brainstorm 새 기능 설계|claude-code+brainstorming
+TDD로 함수 작성|claude-code+tdd
+이 PR 리뷰해줘|claude-code+code-reviewer
+debug 이 crash|claude-code+debugger
+xlsx로 DCF 모델 작성|claude-code+xlsx
+postgres EXPLAIN ANALYZE 결과|claude-code+postgres
+ghidra로 바이너리 reverse|opencode+reverse-engineering
+vault에서 어제 노트 찾아|claude-code+obsidian
+새 routine 만들어줘 매일 9시|paperclip
+지금 뭐 돌고 있어|hermes-self
+상태|hermes-self

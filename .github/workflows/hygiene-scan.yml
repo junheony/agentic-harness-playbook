@@ -1,0 +1,45 @@
+name: hygiene-scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked tree for personal info / credential shapes
+        run: |
+          # 개인정보·자격증명 회귀 스캔. 패턴 추가는 아래 목록에 한 줄만 더하면 된다.
+          # 이 워크플로 파일 자체는 패턴 정의를 담고 있으므로 스캔에서 제외한다.
+          PATTERNS=(
+            '/Users/max'
+            '/home/max'
+            'max-mac'
+            'max-router'
+            'quant_analyzer'
+            'StandX'
+            'apex_indexer'
+            'Documents/개발'
+            'ghp_[A-Za-z0-9]{20}'
+            'sk-[A-Za-z0-9]{20,}'
+            '-----BEGIN (RSA|OPENSSH) PRIVATE KEY'
+            '[0-9]{8,10}:AA[A-Za-z0-9_-]{30}'
+          )
+          fail=0
+          for p in "${PATTERNS[@]}"; do
+            hits=$(git ls-files -z -- . ':!.github/workflows/hygiene-scan.yml' \
+              | xargs -0 grep -IEn -- "$p" || true)
+            if [ -n "$hits" ]; then
+              echo "::error::hygiene-scan: pattern '$p' matched:"
+              echo "$hits"
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo
+            echo "개인 식별자 또는 자격증명 패턴이 발견됐다. placeholder(<project-a>, YOUR_USERNAME 등)로 치환할 것."
+            exit 1
+          fi
+          echo "hygiene-scan: clean"

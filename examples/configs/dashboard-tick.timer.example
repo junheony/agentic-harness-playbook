@@ -1,0 +1,12 @@
+# DEPRECATED: Hermes 네이티브 대시보드(localhost:9119, hermes-dashboard.service.example) 권장
+
+[Unit]
+Description=Run dashboard tick every 60 seconds
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=60s
+Unit=dashboard-tick.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd user agent - mini-router (macOS, systemd unit의 macOS 대응물)
+
+  설치:
+    1. 이 파일의 YOUR_USERNAME 을 본인 macOS 계정명으로 전부 치환
+       (경로가 다르면 agentic-harness 클론 경로도 함께 수정)
+    2. mkdir -p ~/.hermes/logs
+    3. Keychain에 봇 토큰 저장:
+         security add-generic-password -a hermes -s telegram-bot-token -w '<BOT_TOKEN>' -U
+       (확인: security find-generic-password -a hermes -s telegram-bot-token -w)
+    4. cp com.user.mini-router.plist.example ~/Library/LaunchAgents/com.user.mini-router.plist
+    5. launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.user.mini-router.plist
+
+  재시작: launchctl kickstart -k gui/$(id -u)/com.user.mini-router
+  해제:   launchctl bootout gui/$(id -u)/com.user.mini-router
+  로그:   ~/.hermes/logs/mini-router.stdout.log / mini-router.stderr.log
+
+  참고: venv를 쓰면 아래 ProgramArguments의 python3 을
+        /Users/YOUR_USERNAME/agentic-harness/mini-router/.venv/bin/python 으로 교체.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.mini-router</string>
+
+    <!-- bash -lc: 로그인 셸 PATH 로드 → ~/.hermes/.env source → Keychain에서 토큰 export → bot.py exec -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <string>set -a; if [ -f "$HOME/.hermes/.env" ]; then source "$HOME/.hermes/.env"; fi; set +a; export TELEGRAM_BOT_TOKEN="$(security find-generic-password -a hermes -s telegram-bot-token -w)"; exec python3 /Users/YOUR_USERNAME/agentic-harness/mini-router/bot.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/YOUR_USERNAME/agentic-harness/mini-router</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USERNAME/.hermes/logs/mini-router.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USERNAME/.hermes/logs/mini-router.stderr.log</string>
+
+    <!-- opencode/claude CLI가 tmux 자동 부팅에 필요 — PATH에 포함 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/Users/YOUR_USERNAME/.local/bin</string>
+    </dict>
+</dict>
+</plist>

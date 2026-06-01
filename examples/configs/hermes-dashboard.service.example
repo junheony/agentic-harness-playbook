@@ -1,0 +1,29 @@
+# Hermes native web dashboard (Kanban / Office / Memory / Skills / Schedules + TUI chat)
+# 위치: ~/.config/systemd/user/hermes-dashboard.service
+#
+# 우리 custom Canvas/dashboard-tick 대신 Hermes 빌트인 대시보드를 상시 가동.
+# localhost(127.0.0.1) 바인딩 → API key 네트워크 노출 없음.
+# Mac/폰에서 볼 때는 SSH 터널: ssh -N -L 9119:localhost:9119 linux  → http://localhost:9119
+#
+# 설치:
+#   cp examples/configs/hermes-dashboard.service.example ~/.config/systemd/user/hermes-dashboard.service
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now hermes-dashboard.service
+#   loginctl enable-linger $USER   # 로그아웃 후에도 유지
+
+[Unit]
+Description=Hermes Agent web dashboard (localhost:9119, TUI chat enabled)
+After=network.target hermes-gateway.service
+
+[Service]
+Type=simple
+# PATH에 ~/.local/bin (hermes, node, npm) 필요
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# --host 127.0.0.1: localhost만 (API key 노출 방지). 원격 접근은 SSH 터널로.
+# --tui: 브라우저 안 Chat 탭 (PTY/WebSocket). --no-open: 헤드리스(브라우저 자동 실행 X).
+ExecStart=%h/.local/bin/hermes dashboard --host 127.0.0.1 --port 9119 --no-open --tui
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

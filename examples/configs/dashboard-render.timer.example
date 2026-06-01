@@ -1,0 +1,26 @@
+# DEPRECATED: Hermes 네이티브 대시보드(localhost:9119, hermes-dashboard.service.example) 권장
+# systemd timer — dashboard-render (60초 간격, Linux용)
+#
+# 설치:
+#   sudo cp dashboard-render.timer.example /etc/systemd/system/dashboard-render.timer
+#   sudo cp dashboard-render.service.example /etc/systemd/system/dashboard-render.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now dashboard-render.timer
+#
+# 상태 확인:
+#   systemctl status dashboard-render.timer
+#   journalctl -u dashboard-render.service -f
+
+[Unit]
+Description=Mission Control dashboard markdown rollup (every 60s)
+After=network.target
+
+[Timer]
+# 부팅 후 10초 뒤 첫 실행
+OnBootSec=10s
+# 이후 60초마다 반복
+OnUnitActiveSec=60s
+Unit=dashboard-render.service
+
+[Install]
+WantedBy=timers.target

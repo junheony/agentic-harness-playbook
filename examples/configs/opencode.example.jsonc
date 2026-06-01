@@ -1,0 +1,81 @@
+// opencode Configuration with Codex OAuth
+// 위치: ~/.config/opencode/opencode.jsonc
+// JSONC = JSON with Comments
+//
+// ─── 모델 placeholder 사용법 ───────────────────────────
+//   본 예시는 ${MODEL_LARGE} / ${MODEL_BALANCED} / ${MODEL_SMALL} 를 placeholder로 둠.
+//   본인이 현재 사용 가능한 모델로 직접 치환할 것. 예시:
+//     MODEL_LARGE     → Codex 계열 코딩 강모델 (가장 큰 reasoning budget)
+//     MODEL_BALANCED  → 일반 chat 균형 모델
+//     MODEL_SMALL     → 빠른/저비용 small 모델 (라벨링/분류 등)
+//   opencode가 env 변수 치환을 직접 지원하지 않을 경우 본 파일에서 문자열을 직접 교체.
+{
+  // ─── 플러그인 ────────────────────────────────────────
+  "plugin": [
+    // Codex OAuth 사용 — opencode가 ~/.codex/auth.json 자동 인식
+    // TBD: 3rd-party 플러그인 — 사용 전 commit SHA 또는 명시 버전 핀 강력 권장
+    "opencode-openai-codex-auth@latest"
+    // 예: "opencode-openai-codex-auth@1.2.3"
+  ],
+
+  // ─── 모델 ────────────────────────────────────────────
+  // 아래 placeholder를 실제 모델 ID로 교체할 것 (위 안내 참고)
+  "model": "openai/${MODEL_LARGE}",
+  "small_model": "openai/${MODEL_SMALL}",
+
+  // 모델별 variant 설정
+  "model_variants": {
+    "openai/${MODEL_LARGE}": {
+      "variant": "max",
+      "reasoningEffort": "xhigh"
+    },
+    "openai/${MODEL_BALANCED}": {
+      "variant": "high",
+      "reasoningEffort": "high"
+    }
+  },
+
+  // ─── 권한 (디폴트는 보수적, 로컬 신뢰 환경에서만 완화) ──
+  // 화이트리스트가 기본. 모든 명령 허용은 명시적 옵트인.
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "allow": ["pnpm *", "npm *", "git *", "ls *", "cat *", "rg *", "fd *", "jq *", "python *", "node *"],
+      "ask": ["*"]
+      // 로컬 단독 머신에서 모든 명령 자동 허용을 원한다면 (CI/원격에선 금물):
+      // "allow": ["*"]
+    },
+    "webfetch": "ask"
+  },
+
+  // ─── 자동 스킬 (Superpowers 등) ──────────────────────
+  "skills": {
+    "builtin": ["playwright", "git-worktrees", "ast-grep", "lsp-tools"],
+    "auto_load": true,
+    "external_paths": [
+      "~/.config/superpowers/skills",
+      "~/.config/opencode/skills"
+    ]
+  },
+
+  // ─── omo 통합 (Phase 9에서 활성화) ───────────────────
+  "extensions": {
+    "oh-my-openagent": {
+      "enabled": true,
+      "config_path": "~/.config/opencode/oh-my-openagent.jsonc"
+    }
+  },
+
+  // ─── 로깅 ────────────────────────────────────────────
+  "logging": {
+    "level": "info",
+    "path": "~/.opencode/logs/"
+  },
+
+  // ─── 백그라운드 작업 ─────────────────────────────────
+  "background_tasks": {
+    "enabled": true,
+    "max_parallel": 8,
+    "auto_resume_on_failure": true
+  }
+}

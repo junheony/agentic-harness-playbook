@@ -1,0 +1,58 @@
+# Telegram Forum Topic → workdir / tmux 세션 매핑 (canonical 스키마)
+# 위치: ~/.hermes/topic_map.yaml — 본인 환경에 맞게 수정
+#
+# 이 파일은 두 소비자가 읽습니다:
+#   - mini-router (mini-router/bot.py): topic_id, workdir, session 을 사용
+#     (session이 없으면 default_harness에서 세션을 유도:
+#      claude-code → cc-<이름>, opencode → oc-<이름>, self → Hermes 필요 안내)
+#   - Hermes router: 위 필드에 더해 default_harness, skills_extra, description 을 사용
+#
+# topic_id 확인: scripts/topic-discover.sh 실행 → Forum topic의 message_thread_id 출력
+# mini-router는 topic_id 필드 매칭 외에, thread-id 숫자 문자열 키 직접 매핑도 허용:
+#   "42": { workdir: "~/dev/ops", session: "oc-ops" }
+
+topics:
+  general:
+    topic_id: 1
+    workdir: "~/dev"
+    session: "oc-general"
+
+  ops:
+    topic_id: 2
+    workdir: "~/dev/ops"
+    session: "oc-ops"
+    default_harness: "opencode"   # (선택, Hermes 전용)
+    skills_extra: []              # (선택, Hermes 전용)
+    description: "시스템 운영, 헬스체크, 알람"   # (선택, Hermes 전용)
+
+  scratch:
+    topic_id: 5
+    workdir: "~/scratch"
+    session: "oc-scratch"
+    description: "실험, 빠른 테스트"
+
+  research:
+    topic_id: 8
+    workdir: "~/dev/research"
+    session: "cc-research"
+    default_harness: "claude-code"
+    skills_extra: ["obsidian", "web"]
+    description: "도메인 리서치, vault 통합"
+
+  # ─── 본인 프로젝트별 토픽 추가 (topic_id/경로는 실제 값으로 교체) ───
+
+  project-a:
+    topic_id: 12
+    workdir: "~/dev/<project-a>"
+    session: "cc-project-a"
+    default_harness: "claude-code"
+    skills_extra: ["xlsx", "postgres"]
+    description: "<프로젝트 A 설명>"
+
+  project-b:
+    topic_id: 14
+    workdir: "~/dev/<project-b>"
+    session: "oc-project-b"
+    default_harness: "opencode"
+    skills_extra: ["solidity", "forge"]
+    description: "<프로젝트 B 설명>"

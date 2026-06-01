@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Hermes Memory rollup (21:00 KST = 12:00 UTC)
+
+[Timer]
+OnCalendar=*-*-* 12:00:00 UTC
+Persistent=true
+Unit=hermes-daily-rollup.service
+
+[Install]
+WantedBy=timers.target

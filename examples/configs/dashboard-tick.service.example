@@ -1,0 +1,19 @@
+# DEPRECATED: Hermes 네이티브 대시보드(localhost:9119, hermes-dashboard.service.example) 권장
+
+[Unit]
+Description=Mission Control dashboard tick (agents-state + canvas + markdown)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/<user>/agentic-harness/scripts/dashboard-tick.sh
+
+Environment=PATH=/home/<user>/.opencode/bin:/home/<user>/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=VAULT_ROOT=/home/<user>/dashboard-output
+Environment=MISSION_CONTROL_PATH=/home/<user>/dashboard-output/00-Mission-Control/dashboard.md
+Environment=CANVAS_PATH=/home/<user>/dashboard-output/00-Mission-Control/Mission-Control.canvas
+Environment=AGENTS_STATE_JSON=/home/<user>/.hermes/agents-state.json
+Environment=PAPERCLIP_URL=http://localhost:3100
+
+StandardOutput=append:/home/<user>/dashboard-output/tick.log
+StandardError=append:/home/<user>/dashboard-output/tick.err.log
