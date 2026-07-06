@@ -1,6 +1,7 @@
 name: install-smoke
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'scripts/**/*.sh'

@@ -1,6 +1,7 @@
 name: router-tests
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'scripts/test-router.sh'
