@@ -1,4 +1,4 @@
 # mini-router 런타임 의존성 (pip install -r requirements.txt)
 # tests/ 는 stdlib unittest만 사용 — 3rd-party 설치 없이도 실행 가능
-python-telegram-bot==21.*
+python-telegram-bot==22.*
 PyYAML>=6.0
