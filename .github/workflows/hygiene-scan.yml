@@ -8,7 +8,7 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Scan tracked tree for personal info / credential shapes
         run: |
           # 개인정보·자격증명 회귀 스캔. 패턴 추가는 아래 목록에 한 줄만 더하면 된다.
